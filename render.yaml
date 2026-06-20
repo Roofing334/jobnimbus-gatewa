@@ -8,6 +8,8 @@ services:
     envVars:
       - key: JOBNIMBUS_BASE_URL
         value: https://app.jobnimbus.com/api1
+      - key: JOBNIMBUS_AUTH_SCHEME
+        value: api-key
       - key: JOBNIMBUS_API_KEY
         sync: false
       - key: ERIC_GATEWAY_KEY
