@@ -14,4 +14,5 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(config.port, () => {
   console.log(`JobNimbus gateway listening on http://localhost:${config.port}`);
+  console.log("SERVER BOOT: updated router.js mounted for JobNimbus search");
 });
