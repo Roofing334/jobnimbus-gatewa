@@ -70,6 +70,18 @@ Each employee has:
 - `approvalRequired`: actions the gateway must reject until a separate approval flow exists.
 - `scope`: constraints such as assigned-only sales records.
 
+## Required Gateway Keys
+
+Configure one secret environment variable for each enabled employee/agent:
+
+- `ERIC_GATEWAY_KEY`
+- `IAN_MILLER_GATEWAY_KEY`
+- `IAN_ROBINSON_GATEWAY_KEY`
+- `ELLIS_GATEWAY_KEY`
+- `EVAN_GATEWAY_KEY`
+- `JOHNNY_GATEWAY_KEY`
+- `TOMMY_GATEWAY_KEY`
+
 ## Recommended Production Path
 
 1. Keep this API read-only for the first rollout.
