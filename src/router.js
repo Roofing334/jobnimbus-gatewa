@@ -2,7 +2,7 @@ const { authenticate } = require("./auth");
 const { HttpError } = require("./errors");
 const { callJobNimbus } = require("./jobnimbus");
 const { assertAllowed, redactEmployee, scopedSearchParams } = require("./permissions");
-const { detectExactJobNumberLookup, applyLightweightDefaults, cappedSummaryResults, isResponseTooLargeError } = require("./search");
+const { detectExactJobNumberLookup, applyLightweightDefaults, cappedSummaryResults, filterByJobNumber, isResponseTooLargeError } = require("./search");
 const { logSearch, logSearchError } = require("./logger");
 
 async function parseJson(req) {
@@ -72,15 +72,39 @@ async function handleRequest(req, res, config) {
     const startTime = Date.now();
     try {
       // Check for exact job number lookup (supports query.jobNumber, query.number, query.id, or query.q if digits-only)
-      const exactJobId = detectExactJobNumberLookup(resource, query);
-      if (exactJobId) {
-        // For exact job lookups, use the direct read endpoint instead
-        const endpoint = endpointForResource(resource, exactJobId);
-        const result = await callJobNimbus(config, { method: "GET", endpoint });
+      // Important: This is a job NUMBER, not an internal ID - we search/filter by it, not use it as a read-by-id
+      const jobNumber = detectExactJobNumberLookup(resource, query);
+      if (jobNumber) {
+        // For exact job number lookups, search all jobs and filter by job number
+        const lightweightQuery = applyLightweightDefaults(scopedSearchParams(employee, {}));
+        
+        let result;
+        try {
+          result = await callJobNimbus(config, {
+            method: "GET",
+            endpoint: endpointForResource(resource),
+            query: lightweightQuery
+          });
+        } catch (callError) {
+          const duration = Date.now() - startTime;
+          if (isResponseTooLargeError(callError)) {
+            logSearchError(resource, query, callError, duration);
+            throw new HttpError(
+              413,
+              "search_response_too_large",
+              "Search returned too many results. Please refine your criteria (e.g., narrow by date range, sales rep, or use exact job number lookup).",
+              { suggestedLimit: 50 }
+            );
+          }
+          logSearchError(resource, query, callError, duration);
+          throw callError;
+        }
+
+        // Filter results by exact job number match
+        const filtered = filterByJobNumber(Array.isArray(result) ? result : result.results || [], jobNumber);
         const duration = Date.now() - startTime;
-        const summary = cappedSummaryResults(result, 1);
-        logSearch(resource, query, 1, duration, true);
-        sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result: summary });
+        logSearch(resource, query, filtered.count, duration, true);
+        sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, ...filtered });
         return;
       }
 
@@ -117,11 +141,10 @@ async function handleRequest(req, res, config) {
 
       const duration = Date.now() - startTime;
       // Return only lightweight summaries, capped at the limit
-      const summary = cappedSummaryResults(result, lightweightQuery.limit);
-      const resultCount = summary.length;
-      logSearch(resource, query, resultCount, duration, true);
+      const summary = cappedSummaryResults(result, resource, lightweightQuery.limit);
+      logSearch(resource, query, summary.count, duration, true);
 
-      sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result: summary });
+      sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, ...summary });
       return;
     } catch (error) {
       // If it's already an HttpError, re-throw as-is
