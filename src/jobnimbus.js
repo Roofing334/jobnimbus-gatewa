@@ -20,17 +20,21 @@ function buildUrl(baseUrl, endpoint, query = undefined) {
 }
 
 function buildAuthHeaders(config) {
-  const authScheme = process.env.JOBNIMBUS_AUTH_SCHEME || "Bearer";
+  const authScheme = process.env.JOBNIMBUS_AUTH_SCHEME || "api-key";
 
   if (authScheme.toLowerCase() === "token") {
     return { "Authorization": `token ${config.jobNimbusApiKey}` };
+  }
+
+  if (authScheme.toLowerCase() === "bearer") {
+    return { "Authorization": `Bearer ${config.jobNimbusApiKey}` };
   }
 
   if (authScheme.toLowerCase() === "api-key") {
     return { "X-API-Key": config.jobNimbusApiKey };
   }
 
-  return { "Authorization": `Bearer ${config.jobNimbusApiKey}` };
+  return { "Authorization": config.jobNimbusApiKey };
 }
 
 async function callJobNimbus(config, { method, endpoint, query, data }) {
