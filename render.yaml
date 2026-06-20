@@ -16,6 +16,10 @@ services:
         sync: false
       - key: IAN_ROBINSON_GATEWAY_KEY
         sync: false
+      - key: ELLIS_GATEWAY_KEY
+        sync: false
+      - key: EVAN_GATEWAY_KEY
+        sync: false
       - key: JOHNNY_GATEWAY_KEY
         sync: false
       - key: TOMMY_GATEWAY_KEY
