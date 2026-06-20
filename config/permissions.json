@@ -79,6 +79,58 @@
       ]
     },
     {
+      "id": "ellis",
+      "name": "Ellis Sanders",
+      "email": "Ellis@sandsofsc.com",
+      "agent": "Ellis Sales Assistant",
+      "gatewayKeyEnv": "ELLIS_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": true,
+        "salesRepNames": ["Ellis Sanders"]
+      },
+      "allow": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "job:search",
+        "task:create",
+        "task:update_status",
+        "note:create"
+      ],
+      "approvalRequired": [
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
+      "id": "evan",
+      "name": "Evan Sanders",
+      "email": "Evan@sandsofsc.com",
+      "agent": "Evan Construction Manager Assistant",
+      "gatewayKeyEnv": "EVAN_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": false,
+        "salesRepNames": []
+      },
+      "allow": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "job:search",
+        "task:create",
+        "task:update_status",
+        "note:create"
+      ],
+      "approvalRequired": [
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
       "id": "johnny",
       "name": "Johnny Hawley",
       "email": "johnny@sandsroof.com",
