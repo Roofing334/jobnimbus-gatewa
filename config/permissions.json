@@ -1,0 +1,132 @@
+{
+  "employees": [
+    {
+      "id": "eric",
+      "name": "Eric Sanders",
+      "email": "eric@sandsroof.com",
+      "agent": "Chief of Staff",
+      "gatewayKeyEnv": "ERIC_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": false,
+        "salesRepNames": []
+      },
+      "allow": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "job:search",
+        "task:create",
+        "task:update_status",
+        "note:create"
+      ],
+      "approvalRequired": [
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
+      "id": "ian_miller",
+      "name": "Ian Miller",
+      "email": "ian.miller@sandsroof.com",
+      "agent": "Ian Miller Sales Assistant",
+      "gatewayKeyEnv": "IAN_MILLER_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": true,
+        "salesRepNames": ["Ian Miller"]
+      },
+      "allow": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "job:search",
+        "task:create",
+        "task:update_status",
+        "note:create"
+      ],
+      "approvalRequired": [
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
+      "id": "ian_robinson",
+      "name": "Ian Robinson",
+      "email": "ian.robinson@sandsroof.com",
+      "agent": "Ian Robinson Sales Assistant",
+      "gatewayKeyEnv": "IAN_ROBINSON_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": true,
+        "salesRepNames": ["Ian Robinson"]
+      },
+      "allow": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "job:search",
+        "task:create",
+        "task:update_status",
+        "note:create"
+      ],
+      "approvalRequired": [
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
+      "id": "johnny",
+      "name": "Johnny Hawley",
+      "email": "johnny@sandsroof.com",
+      "agent": "Johnny Marketing Manager Assistant",
+      "gatewayKeyEnv": "JOHNNY_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": false,
+        "salesRepNames": []
+      },
+      "allow": [
+        "contact:search",
+        "job:search",
+        "note:create",
+        "task:create"
+      ],
+      "approvalRequired": [
+        "contact:read",
+        "job:read",
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    },
+    {
+      "id": "tommy",
+      "name": "Tommy in Marketing",
+      "email": "tommy@sandsroof.com",
+      "agent": "Tommy in Marketing",
+      "gatewayKeyEnv": "TOMMY_GATEWAY_KEY",
+      "scope": {
+        "assignedOnly": false,
+        "salesRepNames": []
+      },
+      "allow": [
+        "job:search"
+      ],
+      "approvalRequired": [
+        "contact:read",
+        "contact:search",
+        "job:read",
+        "task:create",
+        "note:create",
+        "job:update_status",
+        "financial:update",
+        "bulk:update",
+        "record:delete"
+      ]
+    }
+  ]
+}
