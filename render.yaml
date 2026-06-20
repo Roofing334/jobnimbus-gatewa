@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: jobnimbus-gateway
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JOBNIMBUS_BASE_URL
+        value: https://app.jobnimbus.com/api1
+      - key: JOBNIMBUS_API_KEY
+        sync: false
+      - key: ERIC_GATEWAY_KEY
+        sync: false
+      - key: IAN_MILLER_GATEWAY_KEY
+        sync: false
+      - key: IAN_ROBINSON_GATEWAY_KEY
+        sync: false
+      - key: JOHNNY_GATEWAY_KEY
+        sync: false
+      - key: TOMMY_GATEWAY_KEY
+        sync: false
