@@ -82,6 +82,20 @@ Configure one secret environment variable for each enabled employee/agent:
 - `JOHNNY_GATEWAY_KEY`
 - `TOMMY_GATEWAY_KEY`
 
+## JobNimbus Authentication
+
+The default JobNimbus auth header is:
+
+```text
+X-API-Key: <JOBNIMBUS_API_KEY>
+```
+
+If your JobNimbus API key requires a different header format, set `JOBNIMBUS_AUTH_SCHEME`:
+
+- `api-key`: sends `X-API-Key`
+- `bearer`: sends `Authorization: Bearer`
+- `token`: sends `Authorization: token`
+
 ## Recommended Production Path
 
 1. Keep this API read-only for the first rollout.
