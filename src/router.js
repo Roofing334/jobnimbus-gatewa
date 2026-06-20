@@ -2,6 +2,8 @@ const { authenticate } = require("./auth");
 const { HttpError } = require("./errors");
 const { callJobNimbus } = require("./jobnimbus");
 const { assertAllowed, redactEmployee, scopedSearchParams } = require("./permissions");
+const { detectExactJobNumberLookup, applyLightweightDefaults, isResponseTooLargeError } = require("./search");
+const { logSearch, logSearchError } = require("./logger");
 
 async function parseJson(req) {
   const chunks = [];
@@ -67,14 +69,66 @@ async function handleRequest(req, res, config) {
     const action = `${resource}:search`;
     assertAllowed(employee, action);
 
-    const result = await callJobNimbus(config, {
-      method: "GET",
-      endpoint: endpointForResource(resource),
-      query: scopedSearchParams(employee, query)
-    });
+    const startTime = Date.now();
+    try {
+      // Check for exact job number lookup
+      const exactJobId = detectExactJobNumberLookup(resource, query);
+      if (exactJobId) {
+        // For exact job lookups, use the direct read endpoint instead
+        const endpoint = endpointForResource(resource, exactJobId);
+        const result = await callJobNimbus(config, { method: "GET", endpoint });
+        const duration = Date.now() - startTime;
+        logSearch(resource, query, 1, duration, true);
+        sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result });
+        return;
+      }
 
-    sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result });
-    return;
+      // Apply lightweight defaults to prevent ResponseTooLargeError
+      const lightweightQuery = applyLightweightDefaults(
+        scopedSearchParams(employee, query)
+      );
+
+      let result;
+      try {
+        result = await callJobNimbus(config, {
+          method: "GET",
+          endpoint: endpointForResource(resource),
+          query: lightweightQuery
+        });
+      } catch (callError) {
+        const duration = Date.now() - startTime;
+
+        // If it's a ResponseTooLargeError, log and return user-friendly message
+        if (isResponseTooLargeError(callError)) {
+          logSearchError(resource, query, callError, duration);
+          throw new HttpError(
+            413,
+            "search_response_too_large",
+            "Search returned too many results. Please refine your criteria (e.g., narrow by date range, sales rep, or use exact job number lookup).",
+            { suggestedLimit: 50 }
+          );
+        }
+
+        // Log other errors and re-throw
+        logSearchError(resource, query, callError, duration);
+        throw callError;
+      }
+
+      const duration = Date.now() - startTime;
+      const resultCount = Array.isArray(result) ? result.length : (result?.results?.length || 0);
+      logSearch(resource, query, resultCount, duration, true);
+
+      sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result });
+      return;
+    } catch (error) {
+      // If it's already an HttpError, re-throw as-is
+      if (error.status !== undefined) throw error;
+
+      // Otherwise log and convert to generic error
+      const duration = Date.now() - startTime;
+      logSearchError(resource, query, error, duration);
+      throw error;
+    }
   }
 
   if (path === "/jobnimbus/read") {
