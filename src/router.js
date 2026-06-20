@@ -2,7 +2,7 @@ const { authenticate } = require("./auth");
 const { HttpError } = require("./errors");
 const { callJobNimbus } = require("./jobnimbus");
 const { assertAllowed, redactEmployee, scopedSearchParams } = require("./permissions");
-const { detectExactJobNumberLookup, applyLightweightDefaults, isResponseTooLargeError } = require("./search");
+const { detectExactJobNumberLookup, applyLightweightDefaults, cappedSummaryResults, isResponseTooLargeError } = require("./search");
 const { logSearch, logSearchError } = require("./logger");
 
 async function parseJson(req) {
@@ -71,15 +71,16 @@ async function handleRequest(req, res, config) {
 
     const startTime = Date.now();
     try {
-      // Check for exact job number lookup
+      // Check for exact job number lookup (supports query.jobNumber, query.number, query.id, or query.q if digits-only)
       const exactJobId = detectExactJobNumberLookup(resource, query);
       if (exactJobId) {
         // For exact job lookups, use the direct read endpoint instead
         const endpoint = endpointForResource(resource, exactJobId);
         const result = await callJobNimbus(config, { method: "GET", endpoint });
         const duration = Date.now() - startTime;
+        const summary = cappedSummaryResults(result, 1);
         logSearch(resource, query, 1, duration, true);
-        sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result });
+        sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result: summary });
         return;
       }
 
@@ -115,10 +116,12 @@ async function handleRequest(req, res, config) {
       }
 
       const duration = Date.now() - startTime;
-      const resultCount = Array.isArray(result) ? result.length : (result?.results?.length || 0);
+      // Return only lightweight summaries, capped at the limit
+      const summary = cappedSummaryResults(result, lightweightQuery.limit);
+      const resultCount = summary.length;
       logSearch(resource, query, resultCount, duration, true);
 
-      sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result });
+      sendJson(res, 200, { ok: true, employee: redactEmployee(employee), action, result: summary });
       return;
     } catch (error) {
       // If it's already an HttpError, re-throw as-is
