@@ -1,0 +1,17 @@
+{
+  "name": "jobnimbus-gateway",
+  "version": "1.0.0",
+  "description": "Small permissioned gateway for employee GPT agents to access JobNimbus safely.",
+  "main": "src/server.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "type": "commonjs"
+}
