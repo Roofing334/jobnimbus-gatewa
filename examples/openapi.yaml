@@ -1,0 +1,115 @@
+openapi: 3.1.0
+info:
+  title: Sands Roofing JobNimbus Gateway
+  version: 0.1.0
+  description: Permissioned gateway for employee GPT agents to read and write approved JobNimbus data.
+servers:
+  - url: https://your-gateway-domain.example
+components:
+  securitySchemes:
+    GatewayBearer:
+      type: http
+      scheme: bearer
+security:
+  - GatewayBearer: []
+paths:
+  /me:
+    get:
+      operationId: getGatewayIdentity
+      summary: Show the authenticated employee and allowed actions.
+      responses:
+        "200":
+          description: Authenticated employee profile.
+  /jobnimbus/search:
+    post:
+      operationId: searchJobNimbusRecords
+      summary: Search JobNimbus contacts or jobs within the employee permission scope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resource:
+                  type: string
+                  enum: [contact, job]
+                query:
+                  type: object
+              required: [resource]
+      responses:
+        "200":
+          description: JobNimbus search result.
+  /jobnimbus/read:
+    post:
+      operationId: readJobNimbusRecord
+      summary: Read one JobNimbus contact or job by id when allowed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resource:
+                  type: string
+                  enum: [contact, job]
+                id:
+                  type: string
+              required: [resource, id]
+      responses:
+        "200":
+          description: JobNimbus record.
+  /jobnimbus/task:
+    post:
+      operationId: createJobNimbusTask
+      summary: Create a JobNimbus task when allowed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+              required: [data]
+      responses:
+        "201":
+          description: Created task.
+  /jobnimbus/task/status:
+    post:
+      operationId: updateJobNimbusTaskStatus
+      summary: Update a JobNimbus task status when allowed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                status:
+                  type: string
+              required: [id, status]
+      responses:
+        "200":
+          description: Updated task.
+  /jobnimbus/note:
+    post:
+      operationId: createJobNimbusNote
+      summary: Create a JobNimbus note when allowed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+              required: [data]
+      responses:
+        "201":
+          description: Created note.
